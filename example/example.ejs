@@ -1,221 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta charset="utf-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
-        />
-        <title><%= htmlWebpackPlugin.options.title %></title>
-        <% for (var css in htmlWebpackPlugin.files.css) { %>
-        <link href="<%= htmlWebpackPlugin.files.css[css] %>" rel="stylesheet" />
-        <% } %>
-        <link href="https://playentry.org/lib/entry-tool/dist/entry-tool.css" rel="stylesheet" />
-        <link href="https://playentry.org/lib/entry-lms/dist/assets/app.css" rel="stylesheet" />
-    </head>
-
-    <body>
-        <section style="height: 42px;">
-            <input type="file" id="litemodule" />
-            <input type="text" id="litemodulename" />
-            <button style="border: 1px solid black" onclick="handleUpdate()">
-                apply
-            </button>
-            <button style="border: 1px solid black" onclick="changeWorkspaceMode('block')">
-                Block Mode
-            </button>
-            <button style="border: 1px solid black" onclick="changeWorkspaceMode('python')">
-                Python Mode
-            </button>
-        </section>
-        <div id="workspace"></div>
-
-        <!--language-->
-        <script src="../extern/lang/ko.js"></script>
-
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/PreloadJS/lib/preloadjs-0.6.0.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/EaselJS/lib/easeljs-0.8.0.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/SoundJS/lib/soundjs-0.6.0.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/SoundJS/lib/flashaudioplugin-0.6.0.min.js"
-        ></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/jquery/jquery.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/jquery-ui/ui/minified/jquery-ui.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/velocity/velocity.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/lib/codemirror.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/addon/hint/show-hint.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/addon/lint/lint.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/addon/selection/active-line.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/mode/javascript/javascript.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/codemirror/addon/hint/javascript-hint.js"
-        ></script>
-        <script type="text/javascript" src="https://playentry.org/js/jshint.js"></script>
-        <script type="text/javascript" src="https://playentry.org/lib/fuzzy/lib/fuzzy.js"></script>
-        <script type="text/javascript" src="https://playentry.org/js/ws/python.js"></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-js/extern/util/filbert.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-js/extern/util/CanvasInput.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-js/extern/util/ndgmr.Collision.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-js/extern/util/handle.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-js/extern/util/bignumber.min.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/socket.io-client/socket.io.js"
-        ></script>
-        <script type="text/javascript" src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-        <script type="text/javascript" src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-lms/dist/assets/app.js"
-        ></script>
-        <script src="../extern/util/static.js"></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-tool/dist/entry-tool.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://playentry.org/lib/entry-paint/dist/static/js/entry-paint.js"
-        ></script>
-        <script
-            type="text/javascript"
-            src="https://entry-cdn.pstatic.net/external/sound/sound-editor.js?v=240130-174210"
-        ></script>
-        <script 
-            type="text/javascript" 
-            src="https://entry-cdn.pstatic.net/module/legacy-video/index.js?v=241031-202112"
-        ></script>
-
-
-        <% for (var chunk in htmlWebpackPlugin.files.js) { %>
-        <script src="<%= htmlWebpackPlugin.files.js[chunk] %>"></script>
-        <% } %>
-
-        <script>
-            function handleUpdate() {
-                const file = document.getElementById('litemodule').files[0];
-                const name = document.getElementById('litemodulename').value;
-                Entry.loadLiteTestModule(file, name);
-            }
-
-            function changeWorkspaceMode(mode) {
-                const option = {};
-
-                if (mode === 'block') {
-                    option.boardType = Entry.Workspace.MODE_BOARD;
-                    option.textType = -1;
-                } else {
-                    option.boardType = Entry.Workspace.MODE_VIMBOARD;
-                    option.textType = Entry.Vim.TEXT_TYPE_PY;
-                    option.runType = Entry.Vim.WORKSPACE_MODE;
-                }
-
-                const workspace = Entry.getMainWS();
-
-                if (workspace) {
-                    workspace.setMode(option);
-                } else {
-                    console.error('entry workspace not found!');
-                }
-            }
-        </script>
-        <!--main script-->
-        <script>
-            window.PUBLIC_PATH_FOR_ENTRYJS = 'lib/entry-js/dist/';
-            $(document).ready(function() {
-                var initOption = {
-                    libDir: '',
-                    entryDir: '',
-                    type: 'workspace',
-                    textCodingEnable: true,
-                };
-                Entry.creationChangedEvent = new Entry.Event(window);
-                Entry.init(document.getElementById('workspace'), initOption);
-                Entry.loadProject();
-            });
-        </script>
-<!-- ENTRY ASSESS: paste immediately BEFORE </body> in example/example.ejs -->
+<!-- ENTRY ASSESS: EntryJS internal data table tools -->
 <style>
-#ea-data-tools{position:fixed;right:14px;top:48px;z-index:9999;display:flex;gap:7px;padding:9px;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 3px 12px #0002;font-family:Arial,sans-serif}
-#ea-data-tools button{padding:8px 11px;border:0;border-radius:7px;background:#2458d3;color:#fff;cursor:pointer;font-size:13px}
-#ea-data-tools button:disabled{opacity:.5;cursor:wait}
+  #ea-data-tools { position:fixed;right:14px;top:50px;z-index:99999;display:flex;gap:7px;align-items:center;padding:9px;background:#fff;border:1px solid #ccd5e0;border-radius:10px;box-shadow:0 4px 18px #0002;font:13px sans-serif; }
+  #ea-data-tools button {background:#376cf5;color:#fff;border:0;border-radius:6px;padding:8px 10px;cursor:pointer}
+  #ea-data-tools button:focus-visible{outline:2px solid #111}
+  #ea-data-tools-status {max-width:260px;font-size:12px;color:#344054}
 </style>
 <div id="ea-data-tools">
-  <button id="ea-sample" type="button">예제 데이터 추가</button>
-  <button id="ea-import" type="button">CSV 가져오기</button>
-  <button id="ea-open" type="button">엔트리 데이터 분석 열기</button>
-  <input id="ea-file" type="file" accept=".csv,text/csv" hidden>
+  <button type="button" id="ea-example">예제 데이터 추가</button>
+  <button type="button" id="ea-csv">CSV 가져오기</button>
+  <input type="file" id="ea-csv-file" accept=".csv,text/csv" hidden>
+  <span id="ea-data-tools-status" role="status" aria-live="polite"></span>
 </div>
 <script>
 (function () {
   'use strict';
-  const $id = (id) => document.getElementById(id);
-  const alertError = (e) => { console.error('[ENTRY ASSESS data]', e); alert('데이터 분석 오류: ' + (e.message || e)); };
-  function tableAPI() {
-    if (!window.Entry || !Entry.DataTable || !Entry.playground || !Entry.playground.mainWorkspace) {
-      throw new Error('엔트리 편집기 초기화가 아직 완료되지 않았습니다.');
+  const status = document.getElementById('ea-data-tools-status');
+  const fileInput = document.getElementById('ea-csv-file');
+  function message(text, error) { status.textContent = text; status.style.color = error ? '#b42318' : '#344054'; }
+  function manager() {
+    const dt = window.Entry && Entry.playground && Entry.playground.dataTable;
+    if (!dt || typeof dt.addSources !== 'function' || typeof dt.setSource !== 'function') {
+      throw new Error('엔트리 데이터 분석 기능이 아직 준비되지 않았습니다.');
     }
-    return Entry.DataTable;
+    return dt;
   }
-  function addTable(name, fields, data) {
-    const api = tableAPI();
-    if (!fields.length || !data.length) throw new Error('열 제목과 데이터가 필요합니다.');
-    api.addSource({ name, fields, data }, true);
-    // EntryJS addSource() updates the internal table list and unlocks analysis blocks.
+  function addData(name, rows) {
+    if (!Array.isArray(rows) || rows.length < 2 || rows[0].length === 0) {
+      throw new Error('제목 행과 데이터 행이 각각 1개 이상 필요합니다.');
+    }
+    const width = rows[0].length;
+    if (rows.some(row => row.length !== width)) throw new Error('CSV 행마다 열 개수가 다릅니다.');
+    const dt = manager();
+    const oldCount = dt.dataTables.length;
+    dt.addSources([{ name }]);
+    const selected = dt.dataTables[dt.dataTables.length - 1];
+    if (!selected || dt.dataTables.length !== oldCount + 1) throw new Error('테이블을 생성하지 못했습니다.');
+    try {
+      dt.setSource({ selected, id: selected.id, name, chart: [], table: rows });
+      const saved = dt.getTableJSON().find(item => item.id === selected.id);
+      if (!saved || !Array.isArray(saved.data) || saved.data.length !== rows.length - 1) {
+        throw new Error('엔트리 테이블 저장 결과를 확인할 수 없습니다.');
+      }
+      if (window.Entry && Entry.playground && typeof Entry.playground.reloadPlayground === 'function') {
+        Entry.playground.reloadPlayground();
+      }
+      dt.hide();
+      dt.show({ list: dt.dataTables, selectedIndex: dt.dataTables.length - 1 });
+      message(name + ' — ' + saved.data.length + '행 추가 완료');
+    } catch (err) {
+      message('테이블 생성 후 저장 실패: ' + err.message, true);
+      throw err;
+    }
   }
-  // RFC4180-style quoted CSV parsing, including embedded commas and newlines.
+  // RFC 4180-style CSV parser: supports quoted commas, escaped quotes and multiline cells.
   function parseCSV(text) {
     const rows = []; let row = [], field = '', quoted = false;
     text = text.replace(/^\uFEFF/, '');
@@ -229,44 +66,33 @@
       else if (c === ',') { row.push(field); field = ''; }
       else if (c === '\n' || c === '\r') {
         if (c === '\r' && text[i + 1] === '\n') i++;
-        row.push(field); field = '';
-        if (row.some(v => v.trim() !== '')) rows.push(row);
-        row = [];
+        row.push(field); rows.push(row); row = []; field = '';
       } else field += c;
     }
-    if (quoted) throw new Error('CSV의 따옴표가 닫히지 않았습니다.');
-    row.push(field);
-    if (row.some(v => v.trim() !== '')) rows.push(row);
-    return rows;
+    if (quoted) throw new Error('CSV 따옴표가 닫히지 않았습니다.');
+    if (field !== '' || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(cell => cell !== ''));
   }
-  function run(fn) { try { fn(); } catch (e) { alertError(e); } }
-  $id('ea-sample').addEventListener('click', () => run(() => {
-    addTable('학생별 학습 시간', ['이름', '학습시간', '점수'], [
-      ['가람', 2, 65], ['나래', 3, 72], ['다온', 4, 80],
-      ['라온', 5, 88], ['마루', 6, 95]
-    ]);
-  }));
-  $id('ea-open').addEventListener('click', () => run(() => {
-    const api = tableAPI();
-    api.show({ list: api.dataTables, selectedIndex: Math.max(0, api.dataTables.length - 1) });
-  }));
-  $id('ea-import').addEventListener('click', () => $id('ea-file').click());
-  $id('ea-file').addEventListener('change', async (event) => {
-    const file = event.target.files[0]; if (!file) return;
+  document.getElementById('ea-example').addEventListener('click', function () {
     try {
+      addData('학생 성적 예제 ' + new Date().toLocaleTimeString('ko-KR'), [
+        ['이름', '국어', '수학', '정보'],
+        ['김학생', 85, 90, 95],
+        ['이학생', 70, 88, 92],
+        ['박학생', 95, 80, 100]
+      ]);
+    } catch (err) { message(err.message, true); console.error(err); }
+  });
+  document.getElementById('ea-csv').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async function () {
+    const file = this.files && this.files[0];
+    if (!file) return;
+    try {
+      if (file.size > 2 * 1024 * 1024) throw new Error('CSV 파일은 2MB 이하만 지원합니다.');
       const rows = parseCSV(await file.text());
-      if (rows.length < 2) throw new Error('CSV에는 제목 행과 데이터 행이 필요합니다.');
-      const fields = rows[0].map((x, i) => x.trim() || `열 ${i + 1}`);
-      const data = rows.slice(1).map(row => fields.map((_, i) => {
-        const raw = (row[i] || '').trim();
-        return raw !== '' && /^-?(?:\d+\.?\d*|\.\d+)$/.test(raw) ? Number(raw) : raw;
-      }));
-      addTable(file.name.replace(/\.csv$/i, ''), fields, data);
-    } catch (e) { alertError(e); }
-    finally { event.target.value = ''; }
+      addData(file.name.replace(/\.csv$/i, ''), rows);
+    } catch (err) { message(err.message, true); console.error(err); }
+    finally { this.value = ''; }
   });
 })();
 </script>
-
-    </body>
-</html>
