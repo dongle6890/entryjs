@@ -186,5 +186,87 @@
                 Entry.loadProject();
             });
         </script>
+<!-- ENTRY ASSESS: paste immediately BEFORE </body> in example/example.ejs -->
+<style>
+#ea-data-tools{position:fixed;right:14px;top:48px;z-index:9999;display:flex;gap:7px;padding:9px;background:#fff;border:1px solid #ddd;border-radius:12px;box-shadow:0 3px 12px #0002;font-family:Arial,sans-serif}
+#ea-data-tools button{padding:8px 11px;border:0;border-radius:7px;background:#2458d3;color:#fff;cursor:pointer;font-size:13px}
+#ea-data-tools button:disabled{opacity:.5;cursor:wait}
+</style>
+<div id="ea-data-tools">
+  <button id="ea-sample" type="button">예제 데이터 추가</button>
+  <button id="ea-import" type="button">CSV 가져오기</button>
+  <button id="ea-open" type="button">엔트리 데이터 분석 열기</button>
+  <input id="ea-file" type="file" accept=".csv,text/csv" hidden>
+</div>
+<script>
+(function () {
+  'use strict';
+  const $id = (id) => document.getElementById(id);
+  const alertError = (e) => { console.error('[ENTRY ASSESS data]', e); alert('데이터 분석 오류: ' + (e.message || e)); };
+  function tableAPI() {
+    if (!window.Entry || !Entry.DataTable || !Entry.playground || !Entry.playground.mainWorkspace) {
+      throw new Error('엔트리 편집기 초기화가 아직 완료되지 않았습니다.');
+    }
+    return Entry.DataTable;
+  }
+  function addTable(name, fields, data) {
+    const api = tableAPI();
+    if (!fields.length || !data.length) throw new Error('열 제목과 데이터가 필요합니다.');
+    api.addSource({ name, fields, data }, true);
+    // EntryJS addSource() updates the internal table list and unlocks analysis blocks.
+  }
+  // RFC4180-style quoted CSV parsing, including embedded commas and newlines.
+  function parseCSV(text) {
+    const rows = []; let row = [], field = '', quoted = false;
+    text = text.replace(/^\uFEFF/, '');
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else field += c;
+      } else if (c === '"' && field === '') quoted = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some(v => v.trim() !== '')) rows.push(row);
+        row = [];
+      } else field += c;
+    }
+    if (quoted) throw new Error('CSV의 따옴표가 닫히지 않았습니다.');
+    row.push(field);
+    if (row.some(v => v.trim() !== '')) rows.push(row);
+    return rows;
+  }
+  function run(fn) { try { fn(); } catch (e) { alertError(e); } }
+  $id('ea-sample').addEventListener('click', () => run(() => {
+    addTable('학생별 학습 시간', ['이름', '학습시간', '점수'], [
+      ['가람', 2, 65], ['나래', 3, 72], ['다온', 4, 80],
+      ['라온', 5, 88], ['마루', 6, 95]
+    ]);
+  }));
+  $id('ea-open').addEventListener('click', () => run(() => {
+    const api = tableAPI();
+    api.show({ list: api.dataTables, selectedIndex: Math.max(0, api.dataTables.length - 1) });
+  }));
+  $id('ea-import').addEventListener('click', () => $id('ea-file').click());
+  $id('ea-file').addEventListener('change', async (event) => {
+    const file = event.target.files[0]; if (!file) return;
+    try {
+      const rows = parseCSV(await file.text());
+      if (rows.length < 2) throw new Error('CSV에는 제목 행과 데이터 행이 필요합니다.');
+      const fields = rows[0].map((x, i) => x.trim() || `열 ${i + 1}`);
+      const data = rows.slice(1).map(row => fields.map((_, i) => {
+        const raw = (row[i] || '').trim();
+        return raw !== '' && /^-?(?:\d+\.?\d*|\.\d+)$/.test(raw) ? Number(raw) : raw;
+      }));
+      addTable(file.name.replace(/\.csv$/i, ''), fields, data);
+    } catch (e) { alertError(e); }
+    finally { event.target.value = ''; }
+  });
+})();
+</script>
+
     </body>
 </html>
